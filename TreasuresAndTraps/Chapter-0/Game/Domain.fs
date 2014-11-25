@@ -69,11 +69,13 @@ module Domain =
         |> Array2D.mapi (fun top lft x -> 
             if top = pos.Top && lft = pos.Left then None else x)
 
-(*
-TODO: fix this! 
-When the creature is located on a Treasure,
-the gain should be 100, if it's a Trap, -100,
-otherwise, 0.
-*)
+    let score (x : Cell option) = 
+        match x with
+        | Some(x) ->
+            match x with
+            | Treasure -> 100
+            | Trap -> -100
+        | None -> 0
+
     let computeGain (board:Board) (creature:Creature) =
-        -500
+        score board.[creature.Position.Top,creature.Position.Left]

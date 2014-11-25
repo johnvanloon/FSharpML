@@ -44,14 +44,13 @@ printfn "Gini: %f" gini
 // The following will plot the Example values for the 4 countries
 // listed in the dataframe:
 
-let seqExample = 
-    [   ("China", 10.0)
-        ("Canada", 20.0)
-        ("France", 30.0)
-        ("Germany", 40.0)
-    ]
 
-Chart.GeoChart(seqExample)
+
+let plot = 
+    wb.Countries
+    |> Seq.map (fun x -> x.Name,x.Indicators.``Population, total``.[2013])
+
+Chart.GeoChart(plot)
 
 
 // (...)
@@ -118,11 +117,16 @@ Chart.GeoChart(geoExample, "Combined")
 // ... is the service url to create a type T. Then, use T.Load(...)
 // to call the service, passing in the appropriate parameters.
 //
-//     type Demo = JsonProvider<"http://sample.json">
-//     let data = Demo.Load("http://data.json")
-//     data. (...)
-//
+type Demo = JsonProvider<"http://api.openweathermap.org/data/2.5/weather?units=metric&q=Paris,France">
+// let data = Demo.Load("http://api.openweathermap.org/data/2.5/weather?units=metric&q=Paris,France")
 
+let temps = 
+    wb.Countries
+    |> Seq.map (fun x -> x.Name, x.CapitalCity + "," + x.Name)
+    |> Seq.map (fun x y -> x, Demo.Load("http://api.openweathermap.org/data/2.5/weather?units=metric&q="+y))
+    |> Seq.map (fun x y -> x, y.Main.Temp)
+
+Chart.GeoChart(temps, "Combined")
 
 // (...)
 

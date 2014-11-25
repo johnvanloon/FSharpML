@@ -34,6 +34,7 @@
 
 // Try typing let x = 42 in the script file, 
 // right-click and select "Execute in interactive".
+let x = 42
 
 // let "binds" the value on the right to a name.
 
@@ -71,7 +72,7 @@ open System.IO
 // the following might come in handy: 
 //File.ReadAllLines(path)
 // returns an array of strings for each line 
- 
+let data = File.ReadAllLines(@"C:\Users\jovanloon\Desktop\BuildStuff\Digits\trainingsample.csv")
 // [ YOUR CODE GOES HERE! ]
  
  
@@ -99,7 +100,9 @@ let lengths2 = strings |> Array.map (fun s -> s.Length)
 // The following function might help
 let csvToSplit = "1,2,3,4,5"
 let splitResult = csvToSplit.Split(',')
- 
+
+let sd = Array.map(fun (s:string)->s.Split(',')) data
+let splitData = data |> Array.map (fun s -> s.Split(','))
  
 // [ YOUR CODE GOES HERE! ]
  
@@ -120,7 +123,7 @@ let upToThree = someNumbers.[ .. 2 ]
 // </F# QUICK-STARTER> 
 
 
-// [ YOUR CODE GOES HERE! ]
+let woHeaders = splitData.[1 ..]
  
  
 // 4. CONVERTING FROM STRINGS TO INTS
@@ -138,7 +141,7 @@ let convertedInt = Convert.ToInt32("42")
 let niceInt = int "42" 
  
 // [ YOUR CODE GOES HERE! ]
- 
+let ints = Array.map ( Array.map (fun (s:string) -> int s)) woHeaders 
  
 // 5. CONVERTING ARRAYS TO RECORDS
  
@@ -153,6 +156,7 @@ type Example = { Label:int; Pixels:int[] }
 let example = { Label = 1; Pixels = [| 1; 2; 3; |] }
 // </F# QUICK-STARTER>  
 
+let recs = Array.map (fun (x:int[])-> { Label = x.[0]; Pixels = x.[1..]}) ints
  
 // [ YOUR CODE GOES HERE! ]
  
@@ -186,9 +190,14 @@ let distance (p1: int[]) (p2: int[]) = 42
 // except that in this case, 
 // 42 is likely not the right answer
  
-// [ YOUR CODE GOES HERE! ]
- 
- 
+let dist (p1: int[]) (p2: int[]) =
+    Array.map2 (fun x1 x2 -> (x1 - x2) * (x1 - x2)) p1 p2 
+let edist (p1: int[]) (p2: int[]) =
+    dist p1 p2 |> Array.reduce  (fun acc item -> acc + item)
+
+let eucl (p1: int[]) (p2: int[]) =
+    sqrt (double (edist p1 p2))
+
 // 7. WRITING THE CLASSIFIER FUNCTION
  
 // We are now ready to write a classifier function!
@@ -222,22 +231,50 @@ let functionWithClosure (x: int) =
     else false
 // </F# QUICK-STARTER>  
  
+ 
+let validationFile = File.ReadAllLines(@"C:\Users\jovanloon\Desktop\BuildStuff\Digits\validationsample.csv")
+let vsplitData = validationFile |> Array.map (fun s -> s.Split(','))
+let vwoHeaders = vsplitData.[1 ..]
+let vints = Array.map ( Array.map (fun (s:string) -> int s)) vwoHeaders 
+let vrecs = Array.map (fun (x:int[])-> { Label = x.[0]; Pixels = x.[1..]}) vints
 
- // The classifier function should probably
+let vFile = 
+    File.ReadAllLines(@"C:\Users\jovanloon\Desktop\BuildStuff\Digits\validationsample.csv")
+    |> Array.map (fun s -> s.Split(','))
+    |> fun x -> x.[1 ..]
+    |> Array.map ( Array.map (fun x -> int x))
+    |> Array.map (fun x -> {Label = x.[0]; Pixels = x.[1..]})
+
+
+// The classifier function should probably
 // look like this - except that this one will
 // classify everything as a 0:
 let classify (unknown:int[]) =
-    // do something smart here
-    // like find the Example with
-    // the shortest distance to
-    // the unknown element...
-    // and use the training examples
-    // in a closure...
-    0 
- 
-// [ YOUR CODE GOES HERE! ]
- 
- 
+    recs 
+    |> Array.minBy (fun x -> eucl x.Pixels unknown)
+
+let success (x:Example) =
+    x.Label.Equals (classify x.Pixels).Label
+
+let test (valid:Example[]) =
+    Array.map (fun (x:Example) -> success x) valid
+
+
+let result = test vFile
+    |>
+let count (s:bool[]) =
+    s |> Array.length
+
+let countTrue (s:bool[]) =
+    s |> Array.filter (fun x -> x) |> Array.length
+    
+let div (x:int) (y:int) =
+    float x / float y
+
+let perc (s:bool[]) =
+    s |> (Array.filter (fun x -> x) |> Array.length), Array.length
+    |> fun trueCount allCount -> div trueCount allCount
+
 // 8. EVALUATING THE MODEL AGAINST VALIDATION DATA
  
 // Now that we have a classifier, we need to check

@@ -20,18 +20,38 @@ let validation = readData validationPath
 
 type Pixels = int []
 
+let redNoiseLow x = if x < 30 then 0 else x
+let redNoiseHigh x = if x > 220 then 255 else x
+let redNoise x = redNoiseLow (redNoiseHigh x)
+
+let diff x1 x2 = x1 - x2
+//let diff x1 x2 = (redNoise x1) - (redNoise x2)
+
 let distance (pix1:Pixels) (pix2:Pixels) =
     (pix1, pix2) 
-    ||> Array.map2 (fun x1 x2 -> pown (x1 - x2) 2)
+    ||> Array.map2 (fun x1 x2 -> pown (diff x1 x2) 2)
     |> Array.sum
 
 let classify (pix:Pixels) =
     training
     |> Array.minBy (fun ex -> distance pix ex.Pixels)
-    |> fun ex -> ex.Label
+    |> fun ex -> ex.Label //if (ex.Label = 4) then 9 else ex.Label
+
+//
+//    
+//let majority (candidates:int[])
+//    
+//let classify (pix:Pixels) =
+//    training
+//    |> Array.map (fun ex -> distance pix ex.Pixels, ex.Label)
+//    |> Array.sort
+//    |> fun x -> x.[0..2]
+//    |> fun ex -> fst ex // ex.Label //if (ex.Label = 4) then 9 else ex.Label
+
 
 let quality (sample:Example[]) =
     sample
+//    |> Array.map (fun ex -> if(classify(ex.Pixels) = ex.Label) then 100,100 else classify(ex.Pixels),ex.Label)
     |> Array.map (fun ex -> 
         if classify (ex.Pixels) = ex.Label then 1. else 0.)
     |> Array.average
