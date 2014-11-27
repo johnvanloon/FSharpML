@@ -53,9 +53,6 @@ let greet name = printfn "Hello, %s" name
 open System
 open System.IO
 
-// the following might come in handy: 
-//File.ReadAllLines(path)
-// returns an array of strings for each line 
 let trainingFile = __SOURCE_DIRECTORY__ + @"\trainingsample.csv"
 let validationFile = __SOURCE_DIRECTORY__ + @"\validationsample.csv"
 
@@ -74,17 +71,29 @@ let data filename =
 
 let tData = data trainingFile
 let vData = data validationFile
-let dist (x:int[]) (y:int[]) = 
-    Array.map2 (fun (a:int) (b:int) -> Math.Pow(float a - float b, 2.)) x y
+
+let dist (x : int []) (y : int []) = 
+    Array.map2 (fun (a : int) (b : int) -> Math.Pow(float a - float b, 2.)) x y
     |> Array.sum
     |> fun x -> sqrt x
 
-let validate data:singlePic[] =
-    Array.Parallel.map (fun (pic:singlePic) -> Array.minBy (fun td -> dist pic.Pixels td.Pixels) tData) data
+let validate (data : singlePic []) = 
+    Array.Parallel.map (fun pic -> pic.Number, (fun (x:singlePic) -> x.Number) (Array.minBy (fun td -> dist pic.Pixels td.Pixels) tData)) data
+    |> (fun ar -> (float (Array.filter (fun (x,y) -> x = y) ar |> Array.length) / float (Array.length ar)))
 
+//let success (x : Example) = x.Label.Equals (classify x.Pixels).Label
+//let test (valid : Example []) = Array.map (fun (x : Example) -> success x) valid
+//let result = test vFile
+//  |>
+let count (s : bool []) = s |> Array.length
 
-    //let classify (unknown : int []) = recs |> Array.minBy (fun x -> eucl x.Pixels unknown)
+let countTrue (s : bool []) = 
+    s
+    |> Array.filter (fun x -> x)
+    |> Array.length
 
+let div (x : int) (y : int) = float x / float y
+//let classify (unknown : int []) = recs |> Array.minBy (fun x -> eucl x.Pixels unknown)
 // 2. EXTRACTING COLUMNS
 // Break each line of the file into an array of string,
 // separating by commas, using Array.map
