@@ -50,10 +50,11 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="Visualizer.fs" />
-    <None Include="Beginning.fsx" />
+    <Compile Include="Beginning.fsx" />
     <None Include="Improving.fsx" />
     <None Include="trainingsample.csv" />
     <None Include="validationsample.csv" />
+    <None Include="Original.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
